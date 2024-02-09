@@ -483,7 +483,7 @@ class img:
                     fact = self.img[:, :, i].mean()
                     self.img[:, :, i] = np.log10(self.img[:, :, i] / fact + pseudoval)
 
-    def subsample_pixels(self, features, fract=0.2, random_state=18):
+    def subsample_pixels(self, features, fract=0.2, random_state=16):
         &#34;&#34;&#34;
         Sub-samples fraction of pixels from the image randomly for each channel
 
@@ -1343,7 +1343,7 @@ class img:
                     fact = self.img[:, :, i].mean()
                     self.img[:, :, i] = np.log10(self.img[:, :, i] / fact + pseudoval)
 
-    def subsample_pixels(self, features, fract=0.2, random_state=18):
+    def subsample_pixels(self, features, fract=0.2, random_state=16):
         &#34;&#34;&#34;
         Sub-samples fraction of pixels from the image randomly for each channel
 
@@ -2459,7 +2459,7 @@ channels.</dd>
 </details>
 </dd>
 <dt id="MILWRM.MxIF.img.subsample_pixels"><code class="name flex">
-<span>def <span class="ident">subsample_pixels</span></span>(<span>self, features, fract=0.2, random_state=18)</span>
+<span>def <span class="ident">subsample_pixels</span></span>(<span>self, features, fract=0.2, random_state=16)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Sub-samples fraction of pixels from the image randomly for each channel</p>
@@ -2480,7 +2480,7 @@ for model building</dd>
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def subsample_pixels(self, features, fract=0.2, random_state=18):
+<pre><code class="python">def subsample_pixels(self, features, fract=0.2, random_state=16):
     &#34;&#34;&#34;
     Sub-samples fraction of pixels from the image randomly for each channel
 

@@ -109,7 +109,13 @@ def bin_threshold(mat, threshmin=None, threshmax=0.5):
     return a
 
 
-def map_pixels(adata, filter_label="in_tissue", img_key="hires", library_id=None):
+def map_pixels(
+    adata,
+    filter_label="in_tissue",
+    img_key="hires",
+    library_id=None,
+    map_size=None,
+):
     """
     Map spot IDs to 'pixel space' by assigning spot ID values to evenly spaced grid
 
@@ -122,6 +128,13 @@ def map_pixels(adata, filter_label="in_tissue", img_key="hires", library_id=None
         None, do not filter.
     img_key : str
         adata.uns key containing the image to use for mapping
+    library_id : str, optional (default=None)
+        Key for finding proper library from adata.uns["spatial"]. By default, find
+        the key from adata.uns["spatial"].keys()
+    map_size : tuple of int, optional (default=None)
+        Shape of image to map to. By default, trim to ST coordinates. Can provide
+        shape of whole hires image in adata.uns["spatial"] to yield pitas at full
+        H&E image size.
 
     Returns
     -------
@@ -266,14 +279,39 @@ def map_pixels(adata, filter_label="in_tissue", img_key="hires", library_id=None
 
     print("Creating pixel grid and mapping to nearest barcode coordinates")
     # define grid for pixel space
-    grid_y, grid_x = np.mgrid[
-        a_frame.uns["pixel_map_params"]["ymin_px"] : a_frame.uns["pixel_map_params"][
-            "ymax_px"
-        ],
-        a_frame.uns["pixel_map_params"]["xmin_px"] : a_frame.uns["pixel_map_params"][
-            "xmax_px"
-        ],
-    ]
+    if map_size is not None:
+        # use provided size
+        assert (
+            map_size[1]
+            >= a_frame.uns["pixel_map_params"]["ymax_px"]
+            - a_frame.uns["pixel_map_params"]["ymin_px"]
+        ), "Given map_size isn't large enough."
+        assert (
+            map_size[0]
+            >= a_frame.uns["pixel_map_params"]["xmax_px"]
+            - a_frame.uns["pixel_map_params"]["xmin_px"]
+        ), "Given map_size isn't large enough."
+        grid_y, grid_x = np.mgrid[
+            0 : map_size[0],
+            0 : map_size[1],
+        ]
+        # set min and max pixels to map_size
+        a_frame.uns["pixel_map_params"]["ymin_px"] = 0
+        a_frame.uns["pixel_map_params"]["ymax_px"] = map_size[0]
+        a_frame.uns["pixel_map_params"]["xmin_px"] = 0
+        a_frame.uns["pixel_map_params"]["xmax_px"] = map_size[1]
+
+    else:
+        # determine size from a.obsm["spatial"]
+        grid_y, grid_x = np.mgrid[
+            a_frame.uns["pixel_map_params"]["ymin_px"] : a_frame.uns[
+                "pixel_map_params"
+            ]["ymax_px"],
+            a_frame.uns["pixel_map_params"]["xmin_px"] : a_frame.uns[
+                "pixel_map_params"
+            ]["xmax_px"],
+        ]
+
     # map barcodes to pixel coordinates
     pixel_coords = np.column_stack((grid_x.ravel(order="C"), grid_y.ravel(order="C")))
     barcode_list = griddata(

@@ -1348,7 +1348,7 @@ class st_labeler(tissue_labeler):
         mse_id = estimate_mse_st(cluster_data, adatas, centroids, k)
         colors = plt.cm.tab20(np.linspace(0, 1, len(adatas)))
         if titles is None:
-            titles = ["tissue_ID " + str(x) for x in range(self.k)]
+            titles = ["tissue_domain " + str(x) for x in range(self.k)]
         if labels is None:
             labels = range(len(adatas))
         n_panels = len(mse_id.keys())
@@ -1388,7 +1388,7 @@ class st_labeler(tissue_labeler):
                         -0.3, 0.3, offsets.shape[0]
                     )
                     dots.set_offsets(jittered_offsets)
-            plt.xlabel("tissue domains")
+            plt.xlabel("PCs")
             plt.ylabel("mean square error")
             plt.title(titles[i])
         plt.legend(loc=loc, bbox_to_anchor=bbox_coordinates)

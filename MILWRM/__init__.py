@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 """
 Multiplex Image Labeling With Regional Morphology
+
+Authors: [Harsimran Kaur](https://github.com/KSimi7) & [Cody N. Heiser](https://github.com/codyheiser)
 """
 from .MILWRM import (
     mxif_labeler,
