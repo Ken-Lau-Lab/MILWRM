@@ -540,7 +540,7 @@ class img:
             mean_estimator.append(mean * pixels)
         return mean_estimator, pixels
 
-    def create_tissue_mask(self, features=None, fract=0.2):
+    def create_tissue_mask(self, features=None, fract=0.2, sigma = 2):
         """
         Create tissue mask
 
@@ -556,20 +556,29 @@ class img:
         -------
         a numpy array as tissue mask set to self.mask
         """
+        if isinstance(features, int):  # force features into list if single integer
+            features = [features]
+        if isinstance(features, str):  # force features into int if single string
+            features = [self.ch.index(features)]
+        if checktype(features):  # force features into list of int if list of strings
+            features = [self.ch.index(x) for x in features]
+        if features is None:  # if no features are given, use all of them
+            features = [x for x in range(self.n_ch)]
         # create a copy of the image
         image_cp = self.copy()
-        # create a temporary tissue mask that covers no region
-        w, h, d = image_cp.img.shape
+        # create a temporary tissue mask that covers no region 
+        w, h, d = image_cp.img[:, :, features].shape
         image_cp.mask = np.ones((w, h))
         # log normalization on image
         image_cp.log_normalize()
         # apply gaussian filter
-        image_cp.img = filters.gaussian(image_cp.img, sigma=2, channel_axis=2)
+        image_cp.img = filters.gaussian(image_cp.img, sigma=sigma, channel_axis=2)
         # subsample data to build kmeans model
         subsampled_data = image_cp.subsample_pixels(features, fract=fract)
         cluster_data = np.row_stack(subsampled_data)
         # reshape image for prediction
-        image_ar_reshape = image_cp.img.reshape((w * h, d))
+        tmp = image_cp.img[:, :, features]
+        image_ar_reshape = tmp.reshape((w * h, d))
         # build kmeans model with 2 clusters
         kmeans = KMeans(n_clusters=2, random_state=18).fit(cluster_data)
         labels = kmeans.predict(image_ar_reshape).astype(float)

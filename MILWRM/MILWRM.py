@@ -475,7 +475,7 @@ def estimate_mse_mxif(images, use_path, tissue_IDs, scaler, centroids, features,
     Returns
     -------
     mse_id : dict
-        containing mean square error for each tissue for each visium slide
+        containing mean square error for each tissue for each mxif slide
     """
     mse_temp = {}
     for image_index, image in enumerate(images):
@@ -1834,7 +1834,7 @@ class mxif_labeler(tissue_labeler):
                 color="black",
             )
             plt.xlabel("images")
-            plt.ylabel("percentage variance explained by Kmeans")
+            plt.ylabel("percentage variance not explained by Kmeans")
             plt.ylim((0, 100))
             plt.axhline(
                 y=np.mean(R_squre_for_each_image),
