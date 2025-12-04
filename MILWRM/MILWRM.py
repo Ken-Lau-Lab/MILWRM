@@ -735,6 +735,7 @@ class tissue_labeler:
         self.kmeans = KMeans(n_clusters=self.k, random_state=random_state).fit(
             self.cluster_data
         )
+        
 
     def plot_feature_proportions(self, labels=None, figsize=(10, 7), save_to=None):
         """
@@ -1792,7 +1793,62 @@ class mxif_labeler(tissue_labeler):
             )
             for image in self.image_df["Img"]
         )
-
+        
+        
+    def predict_tissue_regions(self, input_data, path_saves = None,
+                            sigma = 2, mean = None, filter_name = None, n_jobs = -1):
+        '''
+        Use the built kmeans model for prediction on new images
+        process the images first and then pass a list of images
+        for prediction
+        
+        Parameter
+        ---------
+        input_data : list
+            list of MILWRM.MxIF.img objects or path to image objects
+            if using image objects, path_saves have to be provided
+        path_saves: list (default = None)
+            list of paths to save processed images to, can be None
+            if using img object
+        sigma : int
+            parameter for blurring using the same value as used in prep_cluster_data
+        mean : int
+            if the image belongs to same staining batch as training data use that 
+            otherwise calculated from the image
+        filter_name : str
+            use same as prep_cluster_data
+        n_jobs : int (default = -1)
+            see prep_cluster_data
+            
+        Predicted tissue_IDs are saved as self.predicted_tissue_IDs
+        '''
+        
+        assert self.k is not None, 'run find tissue regions first'
+        
+        if type(input_data[0]) == str:
+            use_path = True
+            assert path_saves is not None, 'path to save processed images not provided' 
+        path_save = None    
+        for i,image, in enumerate(input_data):
+            if use_path:
+                path_save = path_saves[i]
+                _ = prep_data_single_sample_mxif(image, use_path=use_path, mean=mean, filter_name=filter_name, 
+                                    sigma=sigma, features=self.model_features, fract = 0.01, path_save=path_save)
+        
+        print("Creating tissue_ID images for image objects...")
+        
+        images = input_data
+        if use_path:
+            images = path_saves
+        self.predicted_tissue_IDs = Parallel(n_jobs=n_jobs, verbose=10)(
+            delayed(add_tissue_ID_single_sample_mxif)(
+                image, use_path, self.model_features, self.kmeans, self.scaler
+            )
+            for image in images
+        )
+        
+            
+        
     def plot_percentage_variance_explained(
         self, fig_size=(5, 5), R_square=False, save_to=None
     ):
