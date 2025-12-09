@@ -1825,9 +1825,11 @@ class mxif_labeler(tissue_labeler):
         
         assert self.k is not None, 'run find tissue regions first'
         
+        use_path = False
+        
         if type(input_data[0]) == str:
             use_path = True
-            assert path_saves is not None, 'path to save processed images not provided' 
+            assert path_saves is not None, 'path to save processed images not provided'
         path_save = None    
         for i,image, in enumerate(input_data):
             if use_path:
